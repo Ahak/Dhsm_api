@@ -26,9 +26,9 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     'https://' + os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost'),   
-# ]
+CORS_ALLOWED_ORIGINS = [
+    'https://' + os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost'),   
+]
 
 
 STORAGE = {

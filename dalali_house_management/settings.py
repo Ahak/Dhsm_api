@@ -140,11 +140,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # CORS settings
 # Get FRONTEND_URL from environment or use default
-FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
+FRONTEND_URL = config('FRONTEND_URL', default='https://dhms-web.onrender.com')
+
+# Allow all origins in development, or use specific origin in production
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default='False').lower() in ('true', '1', 'yes')
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://dhms-web.onrender.com",
     FRONTEND_URL,
 ]
 
@@ -154,6 +158,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://dhms-web.onrender.com",
     FRONTEND_URL,
 ]
 
