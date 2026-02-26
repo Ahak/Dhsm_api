@@ -1,9 +1,10 @@
+#!/usr/bin/env bash
 set -o errexit
+set -o nounset
+set -o pipefail
 
-# Install/upgrade setuptools first to ensure pkg_resources is available
-pip install --upgrade setuptools
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 
-pip install -r requirements.txt
-
-python manage.py collectstatic --noinput 
 python manage.py migrate --noinput
+python manage.py collectstatic --noinput
