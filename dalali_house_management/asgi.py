@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 import os
 
 from django.core.asgi import get_asgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dalali_house_management.settings')
+settings_module = 'api.deployment' if 'RENDER_EXTERNAL_HOSTNAME' in os.environ else 'dalali_house_management.settings'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
 
 application = get_asgi_application()
