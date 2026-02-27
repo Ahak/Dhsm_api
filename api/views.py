@@ -26,9 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def register(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(request.data['password'])
-            user.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
