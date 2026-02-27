@@ -27,7 +27,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://' + os.environ.get(FRONTEND_URL),   
+    'https://' + (os.environ.get('FRONTEND_URL') or FRONTEND_URL).replace('https://', ''),
 ]
 
 
