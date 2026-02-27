@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib.auth import authenticate
 from django.utils import timezone
@@ -13,14 +14,40 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'register', 'me']:
+        if self.action in ['register']:
             return [AllowAny()]
         return [IsAuthenticated()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':
+            return User.objects.all()
+        return User.objects.filter(id=user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only admins can create users from this endpoint.')
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only admins can update users.')
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only admins can update users.')
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            raise PermissionDenied('Only admins can delete users.')
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['post'])
     def register(self, request):
@@ -41,7 +68,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Property.objects.all()
+        user = self.request.user
+        if user.role == 'admin':
+            queryset = Property.objects.all()
+        elif user.role == 'seller':
+            queryset = Property.objects.filter(seller=user)
+        else:
+            queryset = Property.objects.filter(status__in=['approved', 'sold'])
+
         status_filter = self.request.query_params.get('status', None)
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -54,6 +88,31 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
+
+    def perform_update(self, serializer):
+        property_obj = self.get_object()
+        user = self.request.user
+
+        if user.role == 'admin':
+            serializer.save()
+            return
+
+        if user.role == 'seller' and property_obj.seller_id == user.id:
+            if 'status' in self.request.data:
+                raise PermissionDenied('Sellers cannot change property status.')
+            serializer.save(seller=user)
+            return
+
+        raise PermissionDenied('You do not have permission to update this property.')
+
+    def destroy(self, request, *args, **kwargs):
+        property_obj = self.get_object()
+        user = request.user
+
+        if user.role == 'admin' or (user.role == 'seller' and property_obj.seller_id == user.id):
+            return super().destroy(request, *args, **kwargs)
+
+        raise PermissionDenied('You do not have permission to delete this property.')
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def approve(self, request, pk=None):
