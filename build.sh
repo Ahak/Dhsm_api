@@ -9,6 +9,6 @@ python -m pip install -r requirements.txt
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
-if [[ $CREATE_SUPERUSER ]]; then
-    python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL 
-fi
+# if [[ $CREATE_SUPERUSER ]]; then
+#     python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL 
+# fi
