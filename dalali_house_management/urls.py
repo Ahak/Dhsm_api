@@ -24,5 +24,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve uploaded media in both local and deployed environments.
+# In production this is commonly offloaded to a CDN/object storage,
+# but this keeps current file-based uploads accessible.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
