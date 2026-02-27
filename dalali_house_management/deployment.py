@@ -2,12 +2,36 @@ import os
 import dj_database_url
 from .settings import *
 from .settings import BASE_DIR
+from urllib.parse import urlparse
 
 # Update the database configuration with the environment variable
 
-ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+def _to_origin(value, default="http://localhost"):
+    """Return a clean origin (scheme + host[:port]) without path."""
+    raw = (value or default).strip()
+    if not raw:
+        raw = default
+    if "://" not in raw:
+        raw = f"https://{raw}"
 
-CSRF_TRUSTED_ORIGINS = ['https://' + os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')]
+    parsed = urlparse(raw)
+    if not parsed.netloc:
+        return default
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+def _to_host(value, default="localhost"):
+    """Return only host[:port] for ALLOWED_HOSTS."""
+    origin = _to_origin(value, default=f"https://{default}")
+    return urlparse(origin).netloc
+
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "localhost")
+FRONTEND_ORIGIN = _to_origin(os.environ.get("FRONTEND_URL"), default=FRONTEND_URL)
+
+ALLOWED_HOSTS = [_to_host(RENDER_EXTERNAL_HOSTNAME)]
+
+CSRF_TRUSTED_ORIGINS = [_to_origin(RENDER_EXTERNAL_HOSTNAME, default="http://localhost")]
 
 DEBUG = False
 
@@ -27,7 +51,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://' + os.environ.get('FRONTEND_URL', FRONTEND_URL),
+    FRONTEND_URL,
 ]
 
 
