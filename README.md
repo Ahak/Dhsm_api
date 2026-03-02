@@ -13,12 +13,13 @@ React
 
 +IDE  Visual Studio Code
 
-+Deployment: Microsoft Azure
++Deployment: Render 
 
 ## Deployment Link
-
++BAckend
 https://dalalihousesystem.onrender.com/
-
++Frontend
+https://dhms-web.onrender.com
 
 ## Instructions to Run Locally
 # Backend (Django)
